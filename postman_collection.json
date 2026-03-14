@@ -1,0 +1,479 @@
+{
+  "info": {
+    "name": "App Delivery API v1",
+    "description": "Coleção completa da API REST do App Delivery. Importe em Postman ou Insomnia.\n\n**Setup rápido:**\n1. Crie um Environment com a variável `base_url = http://localhost:3000/api/v1`\n2. Faça login ou registro — o `access_token` e `refresh_token` são salvos automaticamente via script\n3. Todas as rotas protegidas já usam `{{access_token}}` no header Authorization",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",      "value": "http://localhost:3000/api/v1", "type": "string" },
+    { "key": "access_token",  "value": "",                             "type": "string" },
+    { "key": "refresh_token", "value": "",                             "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "item": [
+
+        {
+          "name": "Register",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.access_token)  pm.collectionVariables.set('access_token',  res.access_token);",
+                "if (res.refresh_token) pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                "pm.test('Has tokens',  () => pm.expect(res.access_token).to.be.a('string'));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"name\": \"João Teste\",\n    \"email\": \"joao@teste.com\",\n    \"password\": \"senha123\",\n    \"password_confirmation\": \"senha123\",\n    \"phone\": \"11999999999\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.access_token)  pm.collectionVariables.set('access_token',  res.access_token);",
+                "if (res.refresh_token) pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                "pm.test('Status 200',   () => pm.response.to.have.status(200));",
+                "pm.test('Has user obj', () => pm.expect(res.user).to.be.an('object'));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session\": {\n    \"email\": \"joao@teste.com\",\n    \"password\": \"senha123\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+
+        {
+          "name": "Refresh Token",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.access_token)  pm.collectionVariables.set('access_token',  res.access_token);",
+                "if (res.refresh_token) pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                "pm.test('Status 200', () => pm.response.to.have.status(200));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"] }
+          }
+        },
+
+        {
+          "name": "Login — credenciais erradas (401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session\": {\n    \"email\": \"nao@existe.com\",\n    \"password\": \"errada\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "👤 Usuário",
+      "item": [
+
+        {
+          "name": "Meu perfil (GET /me)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200',    () => pm.response.to.have.status(200));",
+                "pm.test('Has user data', () => pm.expect(pm.response.json().data).to.have.property('email'));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        },
+
+        {
+          "name": "Atualizar perfil (PATCH /me)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"name\": \"João Atualizado\",\n    \"phone\": \"11988887777\"\n  }\n}"
+            },
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "📂 Categorias",
+      "item": [
+
+        {
+          "name": "Listar categorias",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200',   () => pm.response.to.have.status(200));",
+                "pm.test('Array result', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                "const first = pm.response.json().data[0];",
+                "if (first) pm.collectionVariables.set('category_id', first.id);"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          }
+        },
+
+        {
+          "name": "Listar categorias + produtos embutidos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/categories?include_products=true",
+              "host": ["{{base_url}}"],
+              "path": ["categories"],
+              "query": [{ "key": "include_products", "value": "true" }]
+            }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🍕 Produtos",
+      "item": [
+
+        {
+          "name": "Listar todos os produtos",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "const products = pm.response.json().data;",
+                "pm.test('Is array', () => pm.expect(products).to.be.an('array'));",
+                "if (products && products.length) pm.collectionVariables.set('product_id', products[0].id);"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"] }
+          }
+        },
+
+        {
+          "name": "Produtos por categoria",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?category_id={{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [{ "key": "category_id", "value": "{{category_id}}" }]
+            }
+          }
+        },
+
+        {
+          "name": "Produtos em destaque",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?featured=true",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [{ "key": "featured", "value": "true" }]
+            }
+          }
+        },
+
+        {
+          "name": "Buscar por nome",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?q=pizza",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [{ "key": "q", "value": "pizza" }]
+            }
+          }
+        },
+
+        {
+          "name": "Filtrar por turno (lunch / dinner / both)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?shift=both",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [{ "key": "shift", "value": "both" }]
+            }
+          }
+        },
+
+        {
+          "name": "Detalhe do produto",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('Has price',  () => pm.expect(pm.response.json().data.price).to.be.a('number'));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{product_id}}"]
+            }
+          }
+        },
+
+        {
+          "name": "Produto inexistente (404)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products/999999",
+              "host": ["{{base_url}}"],
+              "path": ["products", "999999"]
+            }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🛒 Pedidos",
+      "item": [
+
+        {
+          "name": "Listar meus pedidos",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "const orders = pm.response.json().data;",
+                "if (orders && orders.length) pm.collectionVariables.set('order_id', orders[0].id);"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          }
+        },
+
+        {
+          "name": "Criar pedido (pix)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                "const order = pm.response.json().data;",
+                "pm.test('Has total', () => pm.expect(order.total).to.be.a('number'));",
+                "if (order && order.id) pm.collectionVariables.set('order_id', order.id);"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delivery_address\": \"Rua das Flores, 123 - Jardim Primavera\",\n  \"payment_method\": \"pix\",\n  \"promo_code\": null,\n  \"discount\": 0,\n  \"cashback_used\": 0,\n  \"items\": [\n    {\n      \"product_id\": {{product_id}},\n      \"quantity\": 2,\n      \"customizations\": {},\n      \"customizations_label\": null\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          }
+        },
+
+        {
+          "name": "Criar pedido com cashback + customização",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delivery_address\": \"Av. Paulista, 1000 - Bela Vista\",\n  \"payment_method\": \"card\",\n  \"promo_code\": null,\n  \"discount\": 0,\n  \"cashback_used\": 5.00,\n  \"items\": [\n    {\n      \"product_id\": {{product_id}},\n      \"quantity\": 1,\n      \"customizations\": { \"Tamanho\": \"grande\", \"Borda\": \"catupiry\" },\n      \"customizations_label\": \"Grande • Borda catupiry\"\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          }
+        },
+
+        {
+          "name": "Detalhe do pedido",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}"]
+            }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "❤️ Favoritos",
+      "item": [
+
+        {
+          "name": "Listar favoritos (IDs)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('Is array',   () => pm.expect(pm.response.json().data).to.be.an('array'));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/favorites", "host": ["{{base_url}}"], "path": ["favorites"] }
+          }
+        },
+
+        {
+          "name": "Adicionar favorito",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 201', () => pm.response.to.have.status(201));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{product_id}}\n}"
+            },
+            "url": { "raw": "{{base_url}}/favorites", "host": ["{{base_url}}"], "path": ["favorites"] }
+          }
+        },
+
+        {
+          "name": "Remover favorito",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/favorites/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["favorites", "{{product_id}}"]
+            }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🔒 Segurança",
+      "item": [
+
+        {
+          "name": "Rota protegida sem token (401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        },
+
+        {
+          "name": "Token inválido (401)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "token.invalido.aqui", "type": "string" }]
+            },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          }
+        }
+
+      ]
+    }
+
+  ]
+}

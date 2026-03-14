@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: app-delivery-api
+    runtime: ruby
+    buildCommand: bundle install && bin/rails db:migrate
+    startCommand: bundle exec puma -C config/puma.rb
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: app-delivery-db
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        value: "*"   # Troque pelo domínio real em produção
+
+databases:
+  - name: app-delivery-db
+    databaseName: app_delivery_production
+    user: app_delivery
+    plan: free

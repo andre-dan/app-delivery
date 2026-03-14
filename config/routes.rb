@@ -1,14 +1,33 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # Existing web UI
+  root "menu#index"
+  get "menu",          to: "menu#index",    as: :menu
+  get "menu/products", to: "menu#products", as: :menu_products
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # ── API v1 ────────────────────────────────────────────────────────────────
+  namespace :api do
+    namespace :v1 do
+      # Auth (no authentication required)
+      post   "auth/register", to: "auth#register"
+      post   "auth/login",    to: "auth#login"
+      post   "auth/refresh",  to: "auth#refresh"
+
+      # Current user profile
+      get    "me",  to: "users#show"
+      patch  "me",  to: "users#update"
+
+      # Catalog
+      resources :categories, only: [:index]
+      resources :products,   only: [:index, :show]
+
+      # Orders
+      resources :orders, only: [:index, :show, :create]
+
+      # Favorites — uses product_id as the :id param for DELETE
+      resources :favorites, only: [:index, :create, :destroy]
+    end
+  end
 end

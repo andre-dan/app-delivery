@@ -87,6 +87,8 @@ test:
 production:
   primary: &primary_production
     <<: *default
+    # DATABASE_URL env var (set by Render / Railway / Fly) takes priority automatically.
+    # Fallback for manual deploys:
     database: app_delivery_production
     username: app_delivery
     password: <%= ENV["APP_DELIVERY_DATABASE_PASSWORD"] %>

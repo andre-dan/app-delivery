@@ -1,0 +1,74 @@
+<%# ── SETUP ─────────────────────────────────────────────────────────────────────
+    is_dinner => true  → Pizzaria  (zinc-900 / red)
+    is_dinner => false → Galeteria (orange-50 / orange)
+──────────────────────────────────────────────────────────────────────────────── %>
+<% is_dinner = current_theme == "theme-dinner" %>
+<% content_for :title, is_dinner ? "Pizzaria — Cardápio" : "Galeteria — Cardápio" %>
+
+<div data-controller="cart"
+     class="min-h-screen <%= is_dinner ? 'bg-zinc-900 text-zinc-100' : 'bg-orange-50 text-orange-900' %>">
+
+  <%# ── HEADER FIXO ──────────────────────────────────────────────────────────── %>
+  <header class="fixed top-0 left-0 right-0 z-40 shadow-md
+                 <%= is_dinner ? 'bg-zinc-950' : 'bg-orange-600' %>">
+    <div class="mx-auto flex max-w-screen-lg items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl"><%= is_dinner ? "🍕" : "🍗" %></span>
+        <span class="text-lg font-extrabold tracking-tight text-white">
+          <%= is_dinner ? "Pizzaria" : "Galeteria" %>
+        </span>
+      </div>
+      <span class="rounded-full px-3 py-1 text-xs font-bold
+                   <%= is_dinner ? 'bg-red-700 text-red-100' : 'bg-orange-100 text-orange-700' %>">
+        <%= is_dinner ? "🌙 Jantar" : "☀️ Almoço" %>
+      </span>
+    </div>
+  </header>
+
+  <%# ── BARRA DE CATEGORIAS – scroll horizontal sem scrollbar ───────────────── %>
+  <div class="fixed top-14 left-0 right-0 z-30 border-b
+              <%= is_dinner ? 'bg-zinc-900 border-zinc-700' : 'bg-orange-50 border-orange-100' %>">
+    <div class="mx-auto max-w-screen-lg overflow-x-auto px-4 py-2
+                [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div class="flex gap-2 whitespace-nowrap">
+        <% @categories.each do |category| %>
+          <% is_active  = @selected_category&.id == category.id
+             cat_class  = if is_active
+               is_dinner ? "bg-red-700 text-white border-red-700" : "bg-orange-600 text-white border-orange-600"
+             else
+               is_dinner ? "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700" : "bg-white text-orange-700 border-orange-200 hover:bg-orange-100"
+             end
+          %>
+          <%= link_to category.name,
+                menu_products_path(category_id: category.id),
+                data: { turbo_frame: "products" },
+                class: "rounded-full border px-4 py-1.5 text-sm font-semibold transition-all #{cat_class}" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%# ── CONTEÚDO PRINCIPAL ──────────────────────────────────────────────────── %>
+  <div class="mx-auto max-w-screen-lg px-4 pt-28 pb-32">
+    <%= turbo_frame_tag "products" do %>
+      <%= render "menu/products", products: @products %>
+    <% end %>
+  </div>
+
+  <%# ── BOTÃO FLUTUANTE DO CARRINHO (aparece ao adicionar o 1º item) ─────────── %>
+  <div data-cart-target="bar"
+       class="fixed bottom-0 left-0 right-0 z-50 translate-y-full opacity-0 transition-all duration-300">
+    <div class="mx-auto max-w-screen-lg px-4 pb-6">
+      <button class="flex w-full items-center justify-between rounded-2xl px-5 py-4 shadow-2xl
+                     <%= is_dinner ? 'bg-red-700 text-white' : 'bg-orange-600 text-white' %>">
+        <div class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-extrabold"
+                data-cart-target="count">0</span>
+          <span class="font-semibold">Ver sacola</span>
+        </div>
+        <span class="text-base font-extrabold" data-cart-target="total">R$ 0,00</span>
+      </button>
+    </div>
+  </div>
+
+</div>
