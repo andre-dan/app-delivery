@@ -2,7 +2,7 @@ services:
   - type: web
     name: app-delivery-api
     runtime: ruby
-    buildCommand: bundle install && bin/rails db:migrate
+    buildCommand: "./bin/render-build.sh"
     startCommand: bundle exec puma -C config/puma.rb
     envVars:
       - key: RAILS_ENV
@@ -18,7 +18,16 @@ services:
           name: app-delivery-db
           property: connectionString
       - key: ALLOWED_ORIGINS
-        value: "*"   # Troque pelo domínio real em produção
+        value: "*"
+      - key: RENDER_EXTERNAL_HOSTNAME
+        fromService:
+          type: web
+          name: app-delivery-api
+          property: host
+      - key: SOLID_QUEUE_IN_PUMA
+        value: ""
+      - key: DISABLE_PROPSHAFT
+        value: "true"
 
 databases:
   - name: app-delivery-db
