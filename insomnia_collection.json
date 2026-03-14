@@ -1,0 +1,339 @@
+{
+  "_type": "export",
+  "id": "__export_1__",
+  "__export_format": 4,
+  "__export_date": "2026-03-14",
+  "__export_source": "copilot",
+  "resources": [
+
+    {
+      "_id": "wrk_appdelivery",
+      "_type": "workspace",
+      "name": "App Delivery API",
+      "description": "API do app de delivery — Flutter + Rails",
+      "scope": "collection"
+    },
+
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_appdelivery",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "{{ _.base_url }}",
+        "access_token": "",
+        "refresh_token": "",
+        "product_id": "1",
+        "category_id": "1",
+        "order_id": "1"
+      },
+      "color": null,
+      "isPrivate": false
+    },
+
+    {
+      "_id": "env_local",
+      "_type": "environment",
+      "parentId": "wrk_appdelivery",
+      "name": "🖥  Local",
+      "data": {
+        "base_url": "http://localhost:3000/api/v1"
+      },
+      "color": "#4CAF50",
+      "isPrivate": false
+    },
+
+    {
+      "_id": "env_prod",
+      "_type": "environment",
+      "parentId": "wrk_appdelivery",
+      "name": "🚀 Produção — Render",
+      "data": {
+        "base_url": "https://app-delivery-v2nn.onrender.com/api/v1"
+      },
+      "color": "#7C3AED",
+      "isPrivate": false
+    },
+
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_appdelivery",
+      "name": "🔐 Auth",
+      "description": ""
+    },
+
+    {
+      "_id": "req_register",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Register",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/register",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user\": {\n    \"name\": \"João Teste\",\n    \"email\": \"joao@teste.com\",\n    \"password\": \"senha123\",\n    \"password_confirmation\": \"senha123\",\n    \"phone\": \"11999999999\"\n  }\n}"
+      },
+      "afterResponseScript": "const res = JSON.parse(insomnia.response.body);\nif (res.access_token)  insomnia.environment.set('access_token',  res.access_token);\nif (res.refresh_token) insomnia.environment.set('refresh_token', res.refresh_token);"
+    },
+
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"session\": {\n    \"email\": \"joao@teste.com\",\n    \"password\": \"senha123\"\n  }\n}"
+      },
+      "afterResponseScript": "const res = JSON.parse(insomnia.response.body);\nif (res.access_token)  insomnia.environment.set('access_token',  res.access_token);\nif (res.refresh_token) insomnia.environment.set('refresh_token', res.refresh_token);"
+    },
+
+    {
+      "_id": "req_refresh",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Refresh Token",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/refresh",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refresh_token\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "afterResponseScript": "const res = JSON.parse(insomnia.response.body);\nif (res.access_token)  insomnia.environment.set('access_token',  res.access_token);\nif (res.refresh_token) insomnia.environment.set('refresh_token', res.refresh_token);"
+    },
+
+    {
+      "_id": "fld_user",
+      "_type": "request_group",
+      "parentId": "wrk_appdelivery",
+      "name": "👤 Usuário"
+    },
+
+    {
+      "_id": "req_me_get",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Meu perfil",
+      "method": "GET",
+      "url": "{{ _.base_url }}/me",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "req_me_patch",
+      "_type": "request",
+      "parentId": "fld_user",
+      "name": "Atualizar perfil",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/me",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type",  "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user\": {\n    \"name\": \"João Atualizado\",\n    \"phone\": \"11988887777\"\n  }\n}"
+      }
+    },
+
+    {
+      "_id": "fld_categories",
+      "_type": "request_group",
+      "parentId": "wrk_appdelivery",
+      "name": "📂 Categorias"
+    },
+
+    {
+      "_id": "req_categories",
+      "_type": "request",
+      "parentId": "fld_categories",
+      "name": "Listar categorias",
+      "method": "GET",
+      "url": "{{ _.base_url }}/categories",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "afterResponseScript": "const res = JSON.parse(insomnia.response.body);\nif (res.data && res.data.length) insomnia.environment.set('category_id', String(res.data[0].id));"
+    },
+
+    {
+      "_id": "req_categories_with_products",
+      "_type": "request",
+      "parentId": "fld_categories",
+      "name": "Categorias + produtos embutidos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/categories?include_products=true",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "fld_products",
+      "_type": "request_group",
+      "parentId": "wrk_appdelivery",
+      "name": "🍕 Produtos"
+    },
+
+    {
+      "_id": "req_products_all",
+      "_type": "request",
+      "parentId": "fld_products",
+      "name": "Listar todos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/products",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "afterResponseScript": "const res = JSON.parse(insomnia.response.body);\nif (res.data && res.data.length) insomnia.environment.set('product_id', String(res.data[0].id));"
+    },
+
+    {
+      "_id": "req_products_by_category",
+      "_type": "request",
+      "parentId": "fld_products",
+      "name": "Por categoria",
+      "method": "GET",
+      "url": "{{ _.base_url }}/products?category_id={{ _.category_id }}",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "req_products_featured",
+      "_type": "request",
+      "parentId": "fld_products",
+      "name": "Em destaque",
+      "method": "GET",
+      "url": "{{ _.base_url }}/products?featured=true",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "req_products_search",
+      "_type": "request",
+      "parentId": "fld_products",
+      "name": "Buscar por nome",
+      "method": "GET",
+      "url": "{{ _.base_url }}/products?q=pizza",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "req_product_detail",
+      "_type": "request",
+      "parentId": "fld_products",
+      "name": "Detalhe do produto",
+      "method": "GET",
+      "url": "{{ _.base_url }}/products/{{ _.product_id }}",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "fld_orders",
+      "_type": "request_group",
+      "parentId": "wrk_appdelivery",
+      "name": "🛒 Pedidos"
+    },
+
+    {
+      "_id": "req_orders_list",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "Listar meus pedidos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/orders",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "afterResponseScript": "const res = JSON.parse(insomnia.response.body);\nif (res.data && res.data.length) insomnia.environment.set('order_id', String(res.data[0].id));"
+    },
+
+    {
+      "_id": "req_orders_create",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "Criar pedido (pix)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/orders",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type",  "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"delivery_address\": \"Rua das Flores, 123\",\n  \"payment_method\": \"pix\",\n  \"discount\": 0,\n  \"cashback_used\": 0,\n  \"items\": [\n    {\n      \"product_id\": {{ _.product_id }},\n      \"quantity\": 2,\n      \"customizations\": {},\n      \"customizations_label\": null\n    }\n  ]\n}"
+      },
+      "afterResponseScript": "const res = JSON.parse(insomnia.response.body);\nif (res.data && res.data.id) insomnia.environment.set('order_id', String(res.data.id));"
+    },
+
+    {
+      "_id": "req_orders_create_cashback",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "Criar pedido com cashback",
+      "method": "POST",
+      "url": "{{ _.base_url }}/orders",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type",  "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"delivery_address\": \"Av. Paulista, 1000\",\n  \"payment_method\": \"card\",\n  \"discount\": 0,\n  \"cashback_used\": 5.00,\n  \"items\": [\n    {\n      \"product_id\": {{ _.product_id }},\n      \"quantity\": 1,\n      \"customizations\": { \"Tamanho\": \"grande\" },\n      \"customizations_label\": \"Grande\"\n    }\n  ]\n}"
+      }
+    },
+
+    {
+      "_id": "req_order_detail",
+      "_type": "request",
+      "parentId": "fld_orders",
+      "name": "Detalhe do pedido",
+      "method": "GET",
+      "url": "{{ _.base_url }}/orders/{{ _.order_id }}",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "fld_favorites",
+      "_type": "request_group",
+      "parentId": "wrk_appdelivery",
+      "name": "❤️ Favoritos"
+    },
+
+    {
+      "_id": "req_favorites_list",
+      "_type": "request",
+      "parentId": "fld_favorites",
+      "name": "Listar favoritos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/favorites",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    },
+
+    {
+      "_id": "req_favorites_add",
+      "_type": "request",
+      "parentId": "fld_favorites",
+      "name": "Adicionar favorito",
+      "method": "POST",
+      "url": "{{ _.base_url }}/favorites",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type",  "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"product_id\": {{ _.product_id }}\n}"
+      }
+    },
+
+    {
+      "_id": "req_favorites_remove",
+      "_type": "request",
+      "parentId": "fld_favorites",
+      "name": "Remover favorito",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/favorites/{{ _.product_id }}",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }]
+    }
+
+  ]
+}
