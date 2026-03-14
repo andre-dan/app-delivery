@@ -1,13 +1,12 @@
 #!/bin/bash -e
 
-# Se a DATABASE_URL estiver presente, o Rails usará TCP. 
-# Se não estiver, ele tentará socket e falhará.
-if [ -z "$DATABASE_URL" ]; then
-  echo "DATABASE_URL is not set. Skipping database tasks."
-else
-  # No Render, às vezes é melhor rodar apenas o migrate para evitar o erro de socket no 'prepare'
-  echo "Running database migrations..."
-  ./bin/rails db:migrate
+# Se o comando for para iniciar o servidor Rails
+if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  echo "==> Preparando o banco de dados..."
+  ./bin/rails db:prepare
+  
+  echo "==> Rodando seeds..."
+  ./bin/rails db:seed
 fi
 
 exec "${@}"
