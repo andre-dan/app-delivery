@@ -23,7 +23,7 @@ gem "jbuilder"
 gem "bcrypt", "~> 3.1.7"
 
 # JWT authentication
-gem "jwt", "~> 2.9"
+gem "jwt", "~> 3.1"
 
 # CORS for Flutter/mobile clients
 gem "rack-cors"
